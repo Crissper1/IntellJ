@@ -2,6 +2,8 @@ package org.example;
 
 import javax.swing.*;
 import javax.swing.text.AbstractDocument;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class VentanaNotas extends JFrame {
 
@@ -12,6 +14,12 @@ public class VentanaNotas extends JFrame {
     private JButton btnVaciar;
     private JList jListMuestra;
     private JPanel panelMain;
+    private JLabel labelAltas;
+    private JLabel labelBajas;
+    private JLabel labelPromedio;
+    private int contadorAltas = 0;
+    private int contadorBajas = 0;
+    String nota = "";
 
 
     public VentanaNotas() {
@@ -33,7 +41,80 @@ public class VentanaNotas extends JFrame {
         jListMuestra.setModel(model);
         ((AbstractDocument) txtFildNotas.getDocument()).setDocumentFilter(new textfild());
 
+        btnAgregar.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String materia = txtFildMateria.getText();
+                nota = txtFildNotas.getText();
+                if (materia.isEmpty() || nota.isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "Por favor, ingrese la materia y la nota", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                String resumen = String.format("Materia: %s - Nota: %s", materia, nota);
+                model.addElement(resumen);
+                txtFildMateria.setText("");
+                txtFildNotas.setText("");
+                actualizarContadores(Integer.parseInt(nota));
+                actualizarPromedio();
+            }
+
+        });
+        btnBorrar.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int index = jListMuestra.getSelectedIndex();
+                if (index != -1) {
+                    model.remove(index);
+                    //actualizarContadores(Integer.parseInt(nota));
+                    actualizarPromedio();
+
+                } else {
+                    JOptionPane.showMessageDialog(null, "Por favor, seleccione un elemento para borrar", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+
+            }
+
+        });
+        btnVaciar.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                model.clear();
+            }
+        });
     }
+
+    private void actualizarContadores(int nota) {
+        if (nota >= 8) {
+            contadorAltas++;
+            labelAltas.setText(String.valueOf(contadorAltas));
+        } else {
+            contadorBajas++;
+            labelBajas.setText(String.valueOf(contadorBajas));
+        }
+    }
+
+    private void actualizarPromedio() {
+        DefaultListModel<String> model = (DefaultListModel<String>) jListMuestra.getModel();
+        int totalNotas = model.getSize();
+        if (totalNotas == 0) {
+            labelPromedio.setText("n/a");
+            return;
+        }
+
+        int sumaNotas = 0;
+        for (int i = 0; i < totalNotas; i++) {
+            String item = model.getElementAt(i);
+            String[] parts = item.split(" - Nota: ");
+            int nota = Integer.parseInt(parts[1]);
+            sumaNotas += nota;
+        }
+
+        double promedio = (double) sumaNotas / totalNotas;
+        labelPromedio.setText(String.valueOf(promedio));
+    }
+
+
+
 
     public static void main(String[] args) {
 

@@ -79,6 +79,8 @@ public class VentanaNotas extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 model.clear();
+                actualizarContadores(Integer.parseInt(nota));
+                actualizarPromedio();
             }
         });
     }
